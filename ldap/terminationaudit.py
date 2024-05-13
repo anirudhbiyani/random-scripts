@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import openpyxl, getpass, sys, os, hashlib, datetime
-from github import Github
 from ldap3 import Server, Connection, ALL_ATTRIBUTES, ALL, SUBTREE, AUTO_BIND_NO_TLS
 
 """
@@ -11,16 +10,16 @@ Before running this script please make sure you have openpyxl and ldap3 librarie
 __author__ = "Aniruddha Biyani"
 __version__ = "1.0.0"
 __maintainer__ = "Aniruddha Biyani"
-__email__ = "aniruddha.biyani@lithium.com"
-__status__ = "InfoSec_Utilities"
+__email__ = "contact@anirudbiyani.com"
+__status__ = "Active"
 
 def main():
-    base_dn="DC=lithium, DC=local"
+    base_dn="DC=test, DC=local"
+    domain="test.local"
+    domainController=""
     notFound = []
     inSLA = []
     outSLA = []
-    #token = getpass.getpass('Enter your GitHub Personal Access Token: ')
-    g = Github('<Token>')
 
 # Making sure that the fietype is correct and the number of arguments is proper.
     if(len(sys.argv) != 2):
@@ -35,34 +34,50 @@ def main():
         print "File does not exists or is not the right filetype."
         exit(1)
 
-    # Loading the excel file into the program
+    user = raw_input("Enter your username that you want to use to connect: ")
+    pswd = getpass.getpass('Password:')
+    usr= domain+"\\"+user
+    srv = Server(domainController', use_ssl=True, get_info=ALL)
+    conn = Connection(srv, user=usr, password=pswd, authentication="NTLM")
+    conn.bind()
+
+# Loading the excel file into the program
     wb = openpyxl.load_workbook(sys.argv[1], read_only=True, data_only=True)
     worksheet = wb['Sheet1']
     count = worksheet.max_row + 1
 
-    user = raw_input("Enter your username that you want to use to connect: ")
-    pswd = getpass.getpass('Password:')
-
-    usr="lithium.local\\"+user
-    srv = Server('idcdc01.lithium.local', use_ssl = True, get_info=ALL)
-    conn = Connection(srv, user=usr, password=pswd, authentication="NTLM")
-    conn.bind()
+    print '-' * 30
 
     for i in range(2, count):
         firstName = worksheet.cell(i,2).value
         lastName = worksheet.cell(i,3).value
         termDate = worksheet.cell(i,6).value
-        workEmail = worksheet.cell(i,4).value
+        positionID = worksheet.cell(i,1).value
+        title = worksheet.cell(i,8).value
+        deptCode =  worksheet.cell(i,9).value
+        deptName = worksheet.cell(i,10).value
+        location =  worksheet.cell(i,12).value
+
         termDate = termDate.date()
-        #termDate = datetime.datetime.strptime(termDate, "%m/%Y/%d").date()
-        employee = workEmail.split("@", 1)
 
-        conn.search(search_base=base_dn, search_filter='(sAMAccountName=' + employee[0] + ')', search_scope=SUBTREE, attributes=['accountExpires', 'userAccountControl', 'pwdLastSet', 'lastLogonTimestamp', 'employeeNumber'])
-        result = conn.entries
+        employee = (firstName + '.' + lastName).lower()
+        semployee = (firstName[0] + lastName).lower()
+        conn.search(search_base=base_dn, search_filter='(sAMAccountName='+employee+')', search_scope=SUBTREE, attributes=['accountExpires', 'userAccountControl', 'pwdLastSet', 'lastLogonTimestamp'])
+        aresult = conn.entries
 
-        if (len(result) == 0):
+        conn.search(search_base=base_dn, search_filter='(sAMAccountName='+semployee+')', search_scope=SUBTREE, attributes=['accountExpires', 'userAccountControl', 'pwdLastSet', 'lastLogonTimestamp'])
+        sresult = conn.entries
+
+        if (len(aresult) == 0) and (len(sresult) == 0):
             notFound.append(firstName + ' ' + lastName)
         else:
+            if not aresult:
+                result = sresult
+            elif not sresult:
+                result = aresult
+            else:
+                print'Somethingn is wrong with the code'
+
             pswdChange = str(result[0]).split("pwdLastSet: ")[1].split('\n')[0].strip()
             pswdChange = datetime.datetime.strptime(pswdChange, "%Y-%m-%d %H:%M:%S.%f+00:00").date()
 

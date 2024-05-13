@@ -10,8 +10,9 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/admin.reports.audit.readonly', 'https://www.googleapis.com/auth/admin.reports.audit.readonly',  'https://www.googleapis.com/auth/admin.reports.usage.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/gmail.metadata', 'https://www.googleapis.com/auth/activity', 'https://www.googleapis.com/auth/admin.directory.user.security', 'https://www.googleapis.com/auth/admin.directory.user.readonly',       'https://www.googleapis.com/auth/gmail.readonly']
 
     # Authenticate and construct service.
+    delegate_user = ""
     credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scopes=SCOPES)
-    delegated_credentials = credentials.create_delegated('aniruddha.biyani@spredfast.com')
+    delegated_credentials = credentials.create_delegated(delegate_user)
     auditservice = build('admin','reports_v1', credentials=delegated_credentials)
 
     # Setup the logging service

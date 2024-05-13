@@ -1,29 +1,36 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+from __future__ import print_function
+
+import datetime, logging, json, logging.handlers, io
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
 from google.auth.transport.requests import AuthorizedSession
 from oauth2client.service_account import ServiceAccountCredentials
-from apiclient import errors
-import io
+from googleapiclient.http import MediaIoBaseDownload
+
 
 def main():
-   SCOPES = ['https://www.googleapis.com/auth/drive']
+    SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
+    delegate_user = ""
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scopes=SCOPES)
+    delegated_credentials = credentials.create_delegated(delegate_user)
+    service = build("drive", "v3", credentials=delegated_credentials)
 
-   credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scopes=SCOPES)
-   delegated_credentials = credentials.create_delegated('<User Email address whose delegation to be created>')
-   service = build('drive','v3', credentials=delegated_credentials)
+    fileID = ""
+    store_dir = ""
 
-   fileID = "1vKAr_Izn6qA9A1btULGqRsKqQx8lK3rLoPp4k22tJus"
-   store_dir="/Users/aniruddha.biyani/Desktop/"
+    request = service.files().export_media(fileId=fileID, mimeType="application/pdf")
 
-   request = service.files().export_media(fileId=fileID, mimeType='application/pdf')
-   fh = io.FileIO('budget.pdf', 'wb')
-   downloader = MediaIoBaseDownload(fh, request)
-   done = False
-   while done is False:
-       status, done = downloader.next_chunk()
-       print "Download %d%%." % int(status.progress() * 100)
+    fh = io.FileIO(store_dir + "drive.pdf", "wb")
 
-if __name__ == '__main__':
+    downloader = MediaIoBaseDownload(fh, request)
+
+    done = False
+
+    while done is False:
+        status, done = downloader.next_chunk()
+        print("Download %d%%." % int(status.progress() * 100))
+
+
+if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import datetime, logging, json, logging.handlers
 from googleapiclient.discovery import build
@@ -6,11 +6,13 @@ from google.auth.transport.requests import AuthorizedSession
 from oauth2client.service_account import ServiceAccountCredentials
 
 def main():
-    SCOPES = ['https://www.googleapis.com/auth/admin.reports.audit.readonly', 'https://www.googleapis.com/auth/admin.reports.audit.readonly',  'https://www.googleapis.com/auth/admin.reports.usage.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/gmail.metadata', 'https://www.googleapis.com/auth/activity', 'https://www.googleapis.com/auth/admin.directory.user.security', 'https://www.googleapis.com/auth/admin.directory.user.readonly',  	'https://www.googleapis.com/auth/gmail.readonly']
+    SCOPES = ['https://www.googleapis.com/auth/admin.reports.audit.readonly', 'https://www.googleapis.com/auth/admin.reports.usage.readonly', 'https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/admin.directory.user.readonly', 'https://www.googleapis.com/auth/admin.directory.group.readonly']
+
+    delegate_user = ""
 
     # Authenticate and construct service.
     credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scopes=SCOPES)
-    delegated_credentials = credentials.create_delegated('aniruddha.biyani@khoros.com')
+    delegated_credentials = credentials.create_delegated(delegate_user)
     auditservice = build('admin','reports_v1', credentials=delegated_credentials)
 
     # Querying the API to pull the logs
@@ -25,7 +27,7 @@ def main():
     else:
         for i in logs:
 	#    logger.info(json.dumps(i, ensure_ascii=False))
-            print i
+            print(i)
 
     # Looping over the paginated results.
     while(page):
@@ -37,7 +39,7 @@ def main():
         else:
             for j in l:
                 #logger.info(json.dumps(j, ensure_ascii=False))
-                print j
+                print(j)
         pa = npage.get('nextPageToken')
 
 if __name__ == '__main__':

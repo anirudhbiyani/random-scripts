@@ -7,7 +7,7 @@ This script monitors the status of all tunnels for all VPNs for a single EC2 reg
 __author__ = "Aniruddha Biyani"
 __version__ = "1.0"
 __maintainer__ = "Aniruddha Biyani"
-__email__ = "contact@anirudhbiyani.com"
+__email__ = "hi@anirudhbiyani.com"
 __status__ = "Production"
 __date__ = "20170710"
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import datetime, time
 from googleapiclient.discovery import build
@@ -8,23 +8,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 def main():
     SCOPES = ['https://www.googleapis.com/auth/admin.reports.audit.readonly', 'https://www.googleapis.com/auth/admin.reports.audit.readonly',  'https://www.googleapis.com/auth/admin.reports.usage.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/gmail.metadata', 'https://www.googleapis.com/auth/activity', 'https://www.googleapis.com/auth/admin.directory.user.security', 'https://www.googleapis.com/auth/admin.directory.user.readonly',  	'https://www.googleapis.com/auth/gmail.readonly']
 
+    delegate_user = ""
+
     # Authenticate and construct service.
     credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scopes=SCOPES)
-    delegated_credentials = credentials.create_delegated('aniruddha.biyani@spredfast.com')
+    delegated_credentials = credentials.create_delegated(delegate_user)
 
-    gmail = build('gmail', 'v1', credentials=delegated_credentials)
-
-    result = gmail.users().labels().list(userId='aniruddha.biyani@spredfast.com').execute()
-    labels = result.get('labels',[])
-
-    if not labels:
-        print('No labels found.')
-    else:
-        print('Labels:')
-        for label in labels:
-            print(label['name'])
-
-"""
     # Call the Admin SDK Reports API for Administrator activity
     auditservice = build('admin','reports_v1', credentials=delegated_credentials)
     r = auditservice.activities().list(userKey='all', applicationName='admin', startTime=str((datetime.datetime.utcnow() - datetime.timedelta(hours=6)).isoformat() + 'Z'), endTime=str(datetime.datetime.utcnow().isoformat()+'Z')).execute()
@@ -50,7 +39,7 @@ def main():
         print('Logins:')
         for activity in activities:
             print(u'{0}: {1} ({2})'.format(activity['id']['time'],activity['actor']['email'], activity['events'][0]['name']))
-"""
+
 
 if __name__ == '__main__':
     main()
