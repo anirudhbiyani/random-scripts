@@ -1,0 +1,14 @@
+elasticsearch:
+  host: ["<host-url>"]
+  id: "<ELK-api_id>"
+  key: "<ELK-api-key>"
+
+hive:
+  enabled: true
+  url: <hive-url>/api/case
+  apiKey: <api-key>
+
+slack:
+  enabled: false
+  url: <slack-webhook>
+  channel: "<#channel>"
